@@ -1,0 +1,14 @@
+name: DialogueMap
+version: ${version}
+main: mit.cyf.DialogueMapPlugin
+api-version: '1.21.11'
+description: Asset-defined map UI runtime and resource-pack builder.
+commands:
+  dialoguemap:
+    description: Opens, builds, and controls DialogueMap.
+    usage: /dialoguemap <open|build|reload-assets|pan|zoom|close>
+    permission: dialoguemap.admin
+permissions:
+  dialoguemap.admin:
+    description: Allows DialogueMap map display and pack builds.
+    default: op

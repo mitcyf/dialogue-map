@@ -1,0 +1,39 @@
+# All paths are relative to this plugin's data folder.
+#
+# Required inputs:
+#   assets/map.png       The user-generated map image.
+#   assets/ui.png        The complete UI artwork. Its largest fully transparent rectangle
+#                        is the map aperture.
+#   assets/player.png    A 16x16 player marker, pointing north/up.
+assets:
+  map: assets/map.png
+  ui: assets/ui.png
+  player: assets/player.png
+
+map:
+  # The Minecraft world coordinate represented by map.png's top-left pixel.
+  # "y" means the horizontal map Y axis, i.e. Minecraft Z.
+  top-left:
+    x: -2048
+    y: -2048
+  macro-page-usable-size: 254
+
+# Each button texture is supplied by the user. The action is the exact command sent when clicked.
+# Buttons are drawn above ui.png, so the UI artwork can leave transparent button holes.
+buttons: []
+#  - id: pan-north
+#    texture: assets/buttons/up.png
+#    x: 216
+#    y: 0
+#    action: /dialoguemap pan north
+
+resource-pack:
+  archive-path: generated-resource-pack/dialogue-map.zip
+  bind-address: 127.0.0.1
+  port: 8123
+  public-url: http://129.153.127.243:47091/dialogue-map.zip
+  required: true
+  prompt: DialogueMap requires its map resource pack.
+
+build:
+  output-directory: generated-resource-pack

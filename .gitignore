@@ -1,0 +1,11 @@
+.gradle/
+build/
+out/
+*.iml
+
+# Retired terrain-generator inputs; the asset-defined builder no longer reads them.
+src/main/resources/foliage.png
+src/main/resources/grass.png
+src/main/resources/ui-reference.png
+src/main/resources/vanilla-biome-tints-1.21.11.properties
+src/main/resources/vanilla-texture-averages-1.21.11.properties
