@@ -22,7 +22,7 @@ class MapDefinitionPipelineTest {
 		new MapDefinition.UiLayout(448, 384, 32, 32, 384, 256), 4096, 4096, List.of());
 
 	@Test
-	void largestTransparentRectangleDefinesTheMapAperture() throws Exception {
+	void largestTransparentRegionDefinesTheMapAperture() throws Exception {
 		BufferedImage ui = new BufferedImage(32, 24, BufferedImage.TYPE_INT_ARGB);
 		for (int y = 0; y < ui.getHeight(); y++) for (int x = 0; x < ui.getWidth(); x++) ui.setRGB(x, y, 0xFF123456);
 		for (int y = 5; y < 16; y++) for (int x = 7; x < 25; x++) ui.setRGB(x, y, 0x00000000);
@@ -91,6 +91,23 @@ class MapDefinitionPipelineTest {
 			assertTrue(zip.getEntry("assets/dialogue_map/font/ui.json") != null);
 			assertTrue(zip.getEntry("manifest.json") != null);
 		}
+	}
+
+	@Test
+	void bundledSampleAssetsPreserveTheWorkingMapGeometry() throws Exception {
+		BufferedImage ui = ImageIO.read(getClass().getResourceAsStream("/assets/ui.png"));
+		BufferedImage player = ImageIO.read(getClass().getResourceAsStream("/assets/player.png"));
+
+		MapDefinition.UiLayout layout = new MapDefinition.UiLayout(ui.getWidth(), ui.getHeight(), 32, 32, 384, 256);
+
+		assertEquals(448, layout.width());
+		assertEquals(384, layout.height());
+		assertEquals(32, layout.viewportX());
+		assertEquals(32, layout.viewportY());
+		assertEquals(384, layout.viewportWidth());
+		assertEquals(256, layout.viewportHeight());
+		assertEquals(16, player.getWidth());
+		assertEquals(16, player.getHeight());
 	}
 
 	private static boolean containsMapGlyph(Component component) {

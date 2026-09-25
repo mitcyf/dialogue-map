@@ -32,6 +32,7 @@ public final class DialogueMapPlugin extends JavaPlugin implements Listener {
 		saveDefaultConfig();
 		getConfig().options().copyDefaults(true);
 		saveConfig();
+		installSampleAssets();
 		dialogueRenderer = new DialogueRenderer();
 		dialogFactory = new DialogueDialogFactory();
 		try {
@@ -42,6 +43,17 @@ public final class DialogueMapPlugin extends JavaPlugin implements Listener {
 		} catch (IOException exception) {
 			getLogger().severe("DialogueMap resource-pack service could not start: " + exception.getMessage());
 			getServer().getPluginManager().disablePlugin(this);
+		}
+	}
+
+	/** Installs a working sample only when the administrator has not supplied that asset yet. */
+	private void installSampleAssets() {
+		for (String relativePath : new String[] {
+			"map.png", "ui.png", "player.png",
+			"buttons/up.png", "buttons/down.png", "buttons/left.png", "buttons/right.png", "buttons/plus.png", "buttons/minus.png"
+		}) {
+			Path target = getDataFolder().toPath().resolve("assets").resolve(relativePath);
+			if (!java.nio.file.Files.exists(target)) saveResource("assets/" + relativePath, false);
 		}
 	}
 

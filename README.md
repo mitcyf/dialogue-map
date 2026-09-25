@@ -5,7 +5,8 @@ DialogueMap turns user-supplied artwork into a vanilla Minecraft map dialog. It 
 
 ## Inputs
 
-Place these files in `plugins/DialogueMap/assets/`:
+The plugin installs a working sample set in `plugins/DialogueMap/assets/` on first start. Replace
+any of these files with your own artwork when ready:
 
 ```text
 map.png                 Your map image. One source pixel represents one world block at zoom 1.
@@ -14,10 +15,18 @@ player.png              A 16×16 icon which points north/up.
 buttons/<name>.png      Optional clickable button images.
 ```
 
-`ui.png` must contain one fully transparent, axis-aligned map opening. The builder finds its
-largest fully transparent rectangle and uses that rectangle as the map viewport. The UI artwork
-is drawn over the map, so its frame, decorations, and any transparent button holes remain exactly
-as authored.
+`ui.png` must contain one transparent map opening. The builder finds its largest connected
+transparent region and uses its bounding rectangle as the map viewport. This allows rounded frame
+corners to overlap the aperture without shifting it. The UI artwork is drawn over the map, so its
+frame, decorations, and any transparent button holes remain exactly as authored.
+
+For artwork where that inference is ambiguous, pin the aperture manually. The bundled sample does
+this because its rounded inner border overlaps the opening corners:
+
+```yaml
+ui:
+  map-viewport: {x: 32, y: 32, width: 384, height: 256}
+```
 
 Set the world coordinate represented by the top-left map pixel and define optional buttons in
 `config.yml`:

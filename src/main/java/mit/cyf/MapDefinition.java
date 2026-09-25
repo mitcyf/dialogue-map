@@ -68,13 +68,22 @@ public record MapDefinition(
 		if (playerImage.getWidth() != PLAYER_SIZE || playerImage.getHeight() != PLAYER_SIZE) {
 			throw new IOException("player image must be exactly 16x16 pixels: " + player);
 		}
-		UiLayout layout = UiLayout.detect(uiImage);
+		UiLayout layout = configuredOrDetectedLayout(config, uiImage);
 		int originX = config.getInt("map.top-left.x");
 		int originY = config.getInt("map.top-left.y");
 		int pageSize = config.getInt("map.macro-page-usable-size", 254);
 		List<Button> buttons = loadButtons(config, dataDirectory, uiImage.getWidth(), uiImage.getHeight());
 		return new MapDefinition(map, ui, player, originX, originY, pageSize, layout,
 			mapImage.getWidth(), mapImage.getHeight(), buttons);
+	}
+
+	private static UiLayout configuredOrDetectedLayout(FileConfiguration config, BufferedImage image) throws IOException {
+		if (!config.isConfigurationSection("ui.map-viewport")) return UiLayout.detect(image);
+		int x = config.getInt("ui.map-viewport.x");
+		int y = config.getInt("ui.map-viewport.y");
+		int width = config.getInt("ui.map-viewport.width");
+		int height = config.getInt("ui.map-viewport.height");
+		return new UiLayout(image.getWidth(), image.getHeight(), x, y, width, height);
 	}
 
 	public List<ZoomLevel> zoomLevels() {
@@ -161,36 +170,46 @@ public record MapDefinition(
 
 	public record UiLayout(int width, int height, int viewportX, int viewportY, int viewportWidth, int viewportHeight) {
 		static UiLayout detect(BufferedImage image) throws IOException {
-			int[] heights = new int[image.getWidth()];
-			int bestArea = 0;
-			int bestX = 0, bestY = 0, bestWidth = 0, bestHeight = 0;
-			for (int y = 0; y < image.getHeight(); y++) {
-				for (int x = 0; x < image.getWidth(); x++) {
-					heights[x] = (image.getRGB(x, y) >>> 24) == 0 ? heights[x] + 1 : 0;
-				}
-				int[] stack = new int[image.getWidth() + 1];
-				int stackSize = 0;
-				for (int x = 0; x <= image.getWidth(); x++) {
-					int height = x == image.getWidth() ? 0 : heights[x];
-					while (stackSize > 0 && heights[stack[stackSize - 1]] > height) {
-						int index = stack[--stackSize];
-						int rectangleHeight = heights[index];
-						int left = stackSize == 0 ? 0 : stack[stackSize - 1] + 1;
-						int rectangleWidth = x - left;
-						int area = rectangleWidth * rectangleHeight;
-						if (area > bestArea) {
-							bestArea = area;
-							bestX = left;
-							bestY = y - rectangleHeight + 1;
-							bestWidth = rectangleWidth;
-							bestHeight = rectangleHeight;
-						}
+			int width = image.getWidth();
+			int height = image.getHeight();
+			boolean[] visited = new boolean[width * height];
+			int[] queue = new int[visited.length];
+			int bestPixels = 0;
+			int bestLeft = 0, bestTop = 0, bestRight = -1, bestBottom = -1;
+			for (int start = 0; start < visited.length; start++) {
+				if (visited[start] || (image.getRGB(start % width, start / width) >>> 24) != 0) continue;
+				int head = 0, tail = 0;
+				queue[tail++] = start;
+				visited[start] = true;
+				int left = start % width, right = left, top = start / width, bottom = top;
+				while (head < tail) {
+					int pixel = queue[head++];
+					int x = pixel % width;
+					int y = pixel / width;
+					left = Math.min(left, x);
+					right = Math.max(right, x);
+					top = Math.min(top, y);
+					bottom = Math.max(bottom, y);
+					for (int neighbour : new int[] {pixel - 1, pixel + 1, pixel - width, pixel + width}) {
+						if (neighbour < 0 || neighbour >= visited.length) continue;
+						int neighbourX = neighbour % width;
+						int neighbourY = neighbour / width;
+						if ((pixel % width == 0 && neighbourX == width - 1) || (pixel % width == width - 1 && neighbourX == 0)
+							|| visited[neighbour] || (image.getRGB(neighbourX, neighbourY) >>> 24) != 0) continue;
+						visited[neighbour] = true;
+						queue[tail++] = neighbour;
 					}
-					stack[stackSize++] = x;
+				}
+				if (tail > bestPixels) {
+					bestPixels = tail;
+					bestLeft = left;
+					bestRight = right;
+					bestTop = top;
+					bestBottom = bottom;
 				}
 			}
-			if (bestWidth < 1 || bestHeight < 1) throw new IOException("ui.png has no fully transparent map aperture");
-			return new UiLayout(image.getWidth(), image.getHeight(), bestX, bestY, bestWidth, bestHeight);
+			if (bestPixels == 0) throw new IOException("ui.png has no transparent map aperture");
+			return new UiLayout(width, height, bestLeft, bestTop, bestRight - bestLeft + 1, bestBottom - bestTop + 1);
 		}
 	}
 

@@ -2,13 +2,22 @@
 #
 # Required inputs:
 #   assets/map.png       The user-generated map image.
-#   assets/ui.png        The complete UI artwork. Its largest fully transparent rectangle
-#                        is the map aperture.
+#   assets/ui.png        The complete UI artwork. Its largest connected transparent region
+#                        defines the map aperture.
 #   assets/player.png    A 16x16 player marker, pointing north/up.
 assets:
   map: assets/map.png
   ui: assets/ui.png
   player: assets/player.png
+
+ui:
+  # Optional. Omit this section to infer the aperture from ui.png's largest transparent region.
+  # The sample has rounded frame corners, so it pins the known working aperture explicitly.
+  map-viewport:
+    x: 32
+    y: 32
+    width: 384
+    height: 256
 
 map:
   # The Minecraft world coordinate represented by map.png's top-left pixel.
@@ -20,12 +29,37 @@ map:
 
 # Each button texture is supplied by the user. The action is the exact command sent when clicked.
 # Buttons are drawn above ui.png, so the UI artwork can leave transparent button holes.
-buttons: []
-#  - id: pan-north
-#    texture: assets/buttons/up.png
-#    x: 216
-#    y: 0
-#    action: /dialoguemap pan north
+buttons:
+  - id: pan-north
+    texture: assets/buttons/up.png
+    x: 216
+    y: 0
+    action: /dialoguemap pan north
+  - id: pan-south
+    texture: assets/buttons/down.png
+    x: 216
+    y: 304
+    action: /dialoguemap pan south
+  - id: pan-west
+    texture: assets/buttons/left.png
+    x: 0
+    y: 152
+    action: /dialoguemap pan west
+  - id: pan-east
+    texture: assets/buttons/right.png
+    x: 432
+    y: 152
+    action: /dialoguemap pan east
+  - id: zoom-in
+    texture: assets/buttons/plus.png
+    x: 384
+    y: 0
+    action: /dialoguemap zoom in
+  - id: zoom-out
+    texture: assets/buttons/minus.png
+    x: 400
+    y: 0
+    action: /dialoguemap zoom out
 
 resource-pack:
   archive-path: generated-resource-pack/dialogue-map.zip
